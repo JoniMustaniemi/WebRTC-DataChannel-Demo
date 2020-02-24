@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <title>WebRTC: Peer To Peer Datachannel Demo</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="./css/mainStyle.css" type="text/css" media="all">
+  </link>
+  <script src="../js/lib/adapter.js"></script>
+  <script src="./typescript/RTCShareManager.js"></script>
+</head>
+<body id="body">
+  <script type="module">
+
+        const live_mode_button = document.getElementById("liveModeButton");
+        const chat_window_1 = document.getElementById("chatContainer1");
+        const chat_input_1 = document.getElementById("input1");
+        const my_message_1 = document.getElementById("myMessage1");
+        const received_message_1 = document.getElementById("otherMessage1");
+
+        const chat_window_2 = document.getElementById("chatContainer2");
+        const chat_input_2 = document.getElementById("input2");
+        const my_message_2 = document.getElementById("myMessage2");
+        const received_message_2 = document.getElementById("otherMessage2");
+        
+        const rtc = new RTCShareManager({
+           event_handlers: {
+              on_live_mode: function(args) {
+                if(args.isLive) {
+                  live_mode_button.classList.add("button-active");
+                  chat_input_1.value = "";
+                  chat_input_2.value = "";
+                } else {
+                  live_mode_button.classList.remove("button-active");
+                }
+              },
+            on_message: function(args) {
+                if(args.clientId == "1") {
+                      let textContainer = document.createElement("div");
+                      textContainer.className = "otherMessage";
+                      textContainer.innerHTML = JSON.parse(args.message);
+                        chat_window_1.appendChild(textContainer);
+                        chat_window_1.scrollTop = chat_window_1.scrollHeight;
+                } else if (args.clientId == "2") {
+                      let textContainer = document.createElement("div");
+                      textContainer.className = "otherMessage";
+                      textContainer.innerHTML = JSON.parse(args.message);
+                        chat_window_2.appendChild(textContainer);
+                        chat_window_2.scrollTop = chat_window_2.scrollHeight;
+                }
+            },
+            on_send_message: function(args) {
+             
+              if(args.clientId == "1") {
+              
+              let textContainer = document.createElement("div");
+              textContainer.className = "myMessage";
+              textContainer.innerHTML = JSON.parse(args.message);
+              chat_window_1.appendChild(textContainer);
+              chat_window_1.scrollTop = chat_window_1.scrollHeight;
+              } else if (args.clientId == 2) {
+              let textContainer = document.createElement("div");
+              textContainer.className = "myMessage";
+              textContainer.innerHTML = JSON.parse(args.message);
+              chat_window_2.appendChild(textContainer);
+              chat_window_2.scrollTop = chat_window_2.scrollHeight;
+              }
+            },
+            no_live_mode: function(args) {
+              chat_window_1.classList.add("opacity-0");
+              chat_input_1.classList.add("opacity-0");
+              chat_window_2.classList.add("opacity-0");
+              chat_input_2.classList.add("opacity-0");
+            },
+            on_datachannel_close: function(args) {
+              chat_window_1.classList.add("opacity-0");
+              chat_window_2.classList.add("opacity-0");
+             
+            },
+            on_established_connection: function(args) {
+                chat_window_1.innerHTML = "";
+                chat_window_2.innerHTML = "";
+                chat_window_1.classList.remove("opacity-0");
+                chat_window_2.classList.remove("opacity-0");
+                chat_input_1.classList.remove("opacity-0");
+                chat_input_2.classList.remove("opacity-0");
+            }
+          }
+          });         
+                    live_mode_button.addEventListener("click", () => rtc.liveMode());
+                    chat_input_1.addEventListener("keydown", (event) => rtc.checkKey(event.keyCode, "1", chat_input_1));
+                    chat_input_2.addEventListener("keydown", (event) => rtc.checkKey(event.keyCode, "2", chat_input_2));
+
+    </script>
+
+  <div class="infoWrapper">
+    <div class="infoHeader">
+      <h1>Instructions</h1>
+    </div>
+    <div class="infoContainer">
+      <p id="firstrule">1. Enter Livemode &lpar;<img src="./livehelp.png"/>&rpar; </p>
+      <p id="secondrule">2. Type message in a input box and press enter to send message to other client</p>
+    </div>
+  </div>
+
+  <div class="basicButton1 livemode">
+    <button id="liveModeButton"><img src="liveIcon.png" class="shareIcon1" /> </button>
+  </div>
+
+  <!-- ---------------------------------- CLIENT 1 ------------------------------------------------ -->
+  <div class="clientWrapper">
+   
+    <div class="client1">
+      <h1>Client 1</h1>
+      <div class="chatWrapper">
+        <div class="chatContainer1 opacity-0" id="chatContainer1">
+          <p id="myMessage1"></p>
+          <p id="otherMessage1"></p>
+        </div>
+        <input id="input1" class="opacity-0" type="text" placeholder="write something!">
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------------------------------- CLIENT 2 ------------------------------------------------ -->
+  <div class="clientWrapper">
+    <div class="client2">
+      <h1>Client 2</h1>
+      <div class="chatWrapper">
+        <div class="chatContainer2 opacity-0" id="chatContainer2">
+           <p id="myMessage2"></p>
+          <p id="otherMessage2"></p>
+        </div>
+        <input id="input2" class="opacity-0" type="text" placeholder="write something!">
+      </div>
+    </div>
+  </div>
+</body>
+</html>

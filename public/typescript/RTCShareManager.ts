@@ -34,15 +34,11 @@ class ConnectionManager {
         this.setEventHandlers("2");
       }
     }
-
     return;
   }
 
   private setEventHandlers(client) {
-
-
     if (client == "1") {
-
       this.RTCPeerConnectionObject_client_1.onicecandidate = (event) => {
         if (event.candidate) {
           try {
@@ -53,11 +49,11 @@ class ConnectionManager {
           }
         } else {
           console.log("all candidates sent by client 1");
-          if(this.RTCPeerConnectionObject_client_1.iceConnectionState === "new" && this.RTCPeerConnectionObject_client_2.iceConnectionState === "new") {
-        this.stopLiveMode({
-          restart: true
-        });
-      }
+          if (this.RTCPeerConnectionObject_client_1.iceConnectionState === "new" && this.RTCPeerConnectionObject_client_2.iceConnectionState === "new") {
+            this.stopLiveMode({
+              restart: true
+            });
+          }
         }
       };
 
@@ -99,7 +95,6 @@ class ConnectionManager {
         if (this.RTCPeerConnectionObject_client_2) {
           if (this.RTCPeerConnectionObject_client_2.iceConnectionState === "disconnected" || this.RTCPeerConnectionObject_client_2.iceConnectionState === "closed") {
             this.RTCPeerConnectionObject_client_2.close();
-
           }
           if (this.RTCPeerConnectionObject_client_2.iceConnectionState === "connected") {
             console.log("client 2 connected");
@@ -113,13 +108,10 @@ class ConnectionManager {
             this.RTCPeerConnectionObject_client_1.addIceCandidate(event.candidate);
           } catch (error) {
             console.log(error);
-
           }
         } else {
           console.log("all candidates sent by client 2");
         }
-
-
         this.RTCPeerConnectionObject_client_2.ondatachannel = (event) => {
           this.datachannel_client_2 = event.channel;
           this.datachannel_client_2.onopen = (event) => {
@@ -153,11 +145,6 @@ class ConnectionManager {
     } else {
       return;
     }
-
-
-
-
-
   }
 
   private handleDataChannelMessageReceived(event, client) {
@@ -179,8 +166,6 @@ class ConnectionManager {
     }
   }
 
-
-
   private handleDataChannelError(error) {
     console.log(error);
   }
@@ -192,11 +177,8 @@ class ConnectionManager {
     }
   }
 
-
-
   public closeConnection(client: string) {
     if (client == "1") {
-
       this.RTCPeerConnectionObject_client_1.close();
       this.RTCPeerConnection_client_1 = null;
     } else if (client == "2") {
@@ -205,7 +187,6 @@ class ConnectionManager {
       this.RTCPeerConnection_client_2 = null;
     }
     this.checkLivemodeStatuses(this.liveModeStatus_client_1, this.liveModeStatus_client_2);
-
   }
 
   private checkLivemodeStatuses(status_client_1, status_client_2) {
@@ -215,7 +196,6 @@ class ConnectionManager {
       }
     }
   }
-
 
   //sets local description, creates offer and sends it to correct client
   private async createOffer(RTC_object: RTCPeerConnection, client: string) {
@@ -250,13 +230,9 @@ class ConnectionManager {
       }
     } else if (type == "answer") {
       try {
-
         await RTC_object.setRemoteDescription(sessionDesc);
-
-
       } catch (error) {
         console.log(error);
-
       }
     }
   }
@@ -286,28 +262,20 @@ class RTCShareManager {
   private options: any;
 
   constructor(options: any) {
-
     this.options = options;
     this.conMan = new ConnectionManager(
       options
     );
-
-
     this.conMan.stopLiveMode = (args: any) => {
       this.stopLiveMode(args.restart);
     }
-
-
-
   }
-
 
   public liveMode() {
 
     if (typeof this.options.event_handlers.on_live_mode === 'function') {
       this.options.event_handlers.on_live_mode({
         isLive: !this.liveModeStatus_client_1,
-
       });
     }
 
@@ -322,8 +290,7 @@ class RTCShareManager {
     }
   }
 
-
-  private stopLiveMode(client?: string, restart?: boolean) {
+  private stopLiveMode(client ? : string, restart ? : boolean) {
     if (client == "1") {
       this.liveModeStatus_client_1 = false;
       this.conMan.liveModeStatus_client_1 = false;
@@ -341,7 +308,7 @@ class RTCShareManager {
         this.conMan.RTCPeerConnection_client_2 = undefined;
         this.conMan.datachannel_client_2 = null;
       }
-    } else if(restart !== undefined) {
+    } else if (restart !== undefined) {
       console.log("trying again..")
       this.liveModeStatus_client_1 = false;
       this.liveModeStatus_client_2 = false;
@@ -384,7 +351,6 @@ class RTCShareManager {
   }
 
   public checkKey(key, client, element) {
-
     if (key == "13" && client == "1") {
       let message = element.value;
       this.checkMessage(message, "1");

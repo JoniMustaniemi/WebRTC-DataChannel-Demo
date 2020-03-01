@@ -197,7 +197,6 @@ class ConnectionManager {
     }
   }
 
-  //sets local description, creates offer and sends it to correct client
   private async createOffer(RTC_object: RTCPeerConnection, client: string) {
     try {
       if (client == "1") {
@@ -213,8 +212,6 @@ class ConnectionManager {
     }
   }
 
-  //sets remote description based on type (offer or answer)
-  //if type is 'answer' completes the handshake and checks if RTCPeerConnection object is connected succesfully
   private async setRemote(sessionDesc: RTCSessionDescriptionInit, type: string, RTC_object: RTCPeerConnection) {
     if (type == "offer") {
       try {
@@ -255,7 +252,6 @@ class Connection {
 }
 
 class RTCShareManager {
-
   private liveModeStatus_client_1: boolean = false;
   private liveModeStatus_client_2: boolean = false;
   private conMan: ConnectionManager;
@@ -272,7 +268,6 @@ class RTCShareManager {
   }
 
   public liveMode() {
-
     if (typeof this.options.event_handlers.on_live_mode === 'function') {
       this.options.event_handlers.on_live_mode({
         isLive: !this.liveModeStatus_client_1,

@@ -13,10 +13,12 @@ class ConnectionManager {
   public datachannel_client_2: RTCDataChannel;
   public stopLiveMode: Function;
 
+  //creates reference for UI element handling
   constructor(options: any) {
     this.options = options;
   }
 
+  //initializes RTCPeerConnection objects and sets appropriate eveten handlers for each client
   public startConnection(liveModeStatus: boolean, client: string) {
     if (client == "1") {
       this.liveModeStatus_client_1 = liveModeStatus;
@@ -57,12 +59,14 @@ class ConnectionManager {
         }
       };
 
+      //when negotiation is needed starts connection handshake procedure
       this.RTCPeerConnectionObject_client_1.onnegotiationneeded = () => {
         if (this.liveModeStatus_client_1 && this.liveModeStatus_client_2) {
           this.createOffer(this.RTCPeerConnectionObject_client_1, "1");
         }
       }
 
+       //listens RTCPeerConnection objects for connection state changes and makes appropriate actions
       this.RTCPeerConnectionObject_client_1.addEventListener("iceconnectionstatechange", ev => {
         if (this.RTCPeerConnectionObject_client_1) {
           if (this.RTCPeerConnectionObject_client_1.iceConnectionState === "disconnected") {
@@ -77,6 +81,8 @@ class ConnectionManager {
           }
         }
       }, false);
+
+       //listens datachannel for various events and takes appropriate action
       this.datachannel_client_1.onopen = (event) => {
 
         this.handleDataChannelOpen(event, "1");
@@ -102,6 +108,7 @@ class ConnectionManager {
         }
       }, false);
 
+      //When IceCandidate is found adds it to the other client
       this.RTCPeerConnectionObject_client_2.onicecandidate = (event) => {
         if (event.candidate) {
           try {
@@ -147,6 +154,7 @@ class ConnectionManager {
     }
   }
 
+//when message is received parses message and updates UI elements
   private handleDataChannelMessageReceived(event, client) {
     let message = JSON.parse(event.data);
     if (client == "2") {
@@ -189,6 +197,7 @@ class ConnectionManager {
     this.checkLivemodeStatuses(this.liveModeStatus_client_1, this.liveModeStatus_client_2);
   }
 
+  // handles updating UI elements when neither client is in livemode because connection objects were terminated
   private checkLivemodeStatuses(status_client_1, status_client_2) {
     if (status_client_1 == false || status_client_2 == false) {
       if (typeof this.options.event_handlers.no_live_mode === 'function') {
@@ -197,6 +206,7 @@ class ConnectionManager {
     }
   }
 
+  //creates SDP offer for the purpose of starting a new WebRTC connection with another client
   private async createOffer(RTC_object: RTCPeerConnection, client: string) {
     try {
       if (client == "1") {
@@ -216,6 +226,7 @@ class ConnectionManager {
     if (type == "offer") {
       try {
         await RTC_object.setRemoteDescription(sessionDesc);
+        //creates an SDP answer to an offer received from another client
         this.answer_client_2 = await RTC_object.createAnswer();
         await RTC_object.setLocalDescription(this.answer_client_2);
         //todo: move remote and local handling to connection class
@@ -262,11 +273,14 @@ class RTCShareManager {
     this.conMan = new ConnectionManager(
       options
     );
+
+    //if WebRTC connection fails, initializes restart functionality
     this.conMan.stopLiveMode = (args: any) => {
       this.stopLiveMode(args.restart);
     }
   }
 
+  //handles livemode functionality. initializes connection sequences and is responsible for ending connection if livemode is turned off 
   public liveMode() {
     if (typeof this.options.event_handlers.on_live_mode === 'function') {
       this.options.event_handlers.on_live_mode({
@@ -320,7 +334,7 @@ class RTCShareManager {
       this.conMan.startConnection(this.liveModeStatus_client_2, "2");
     }
   }
-
+   //validates received message, stringifies it and sends it through datachannel to another client. updated UI elements to display 'my message' on chat window
   private checkMessage(chatInputValue, client) {
     if (!chatInputValue.length || !chatInputValue.replace(/\s/g, '').length) {
       return;
@@ -344,7 +358,7 @@ class RTCShareManager {
       }
     }
   }
-
+  //checks pressed key and if it is 'Enter' key, starts  message validating
   public checkKey(key, client, element) {
     if (key == "13" && client == "1") {
       let message = element.value;
